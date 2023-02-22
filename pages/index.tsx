@@ -1,10 +1,11 @@
 import React from 'react'
 import {Product, FooterBanner, HeroBanner} from '../components'
+import {client} from '../lib/client';
 
-const index = () => {
+const index = ({products, bannerData}) => {
   return (
     <div>
-      <HeroBanner/>
+      <HeroBanner bannerData={bannerData.length && bannerData[0]}/>
 
       <div className='products-heading'>
         <h2>Best selling Products</h2>
@@ -12,15 +13,29 @@ const index = () => {
 
       </div>
       <div className='products-container'>
-        {['Product 1','Product 2'].map(
-          (product)=> <p>{product}</p>
+        {products?.map(
+          (product)=> <Product key={product._id} product={product}/>
         )}
       </div>
       <div>
-<FooterBanner/>
+<FooterBanner footerBanner={bannerData && bannerData[0]}/>
       </div>
     </div>
   )
 }
 
-export default index
+export const getServerSideProps = async () => {
+  const query = '*[_type == "product"]'
+  const products = await client.fetch(query);
+
+  const bannerQuery = '*[_type == "banner"]'
+  const bannerData = await client.fetch(bannerQuery);
+
+  return{
+    props:{products, bannerData}
+  }
+}
+
+export default index;
+
+
